@@ -1144,7 +1144,7 @@ PAGE = """
 
   /* three panel layout */
   .layout { display:flex; align-items:flex-start; }
-  .left-panel { width: 220px; flex-shrink:0; padding: 16px; border-right: 1px solid var(--border); position: sticky; top:0; }
+  .left-panel { width: 220px; flex-shrink:0; padding: 16px; border-right: 1px solid var(--border); position: sticky; top:0; transition: left .25s; }
   .left-panel h3 { font-size: 12px; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
   .left-panel h3:first-child { margin-top: 0; }
   .pick-btn { display:block; width:100%; text-align:left; background: var(--panel); border:1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius:6px; font-size: 13px; margin-bottom:6px; cursor:pointer; text-decoration:none; }
@@ -1188,6 +1188,11 @@ PAGE = """
      for desktop card widths. */
   svg { max-width: 100%; height: auto; }
 
+  /* left panel toggle (mobile only) + scrim */
+  .left-toggle { display:none; position: fixed; left: 0; top: 100px; background: var(--accent); color: var(--bg); border:none; padding: 10px 6px; border-radius: 0 8px 8px 0; cursor:pointer; font-weight:bold; writing-mode: vertical-rl; z-index: 50; }
+  .scrim { display:none; position: fixed; inset:0; background: rgba(0,0,0,.45); z-index: 48; }
+  .scrim.open { display:block; }
+
   /* right drawer */
   .right-toggle { position: fixed; right: 0; top: 100px; background: var(--accent); color: var(--bg); border:none; padding: 10px 6px; border-radius: 8px 0 0 8px; cursor:pointer; font-weight:bold; writing-mode: vertical-rl; z-index: 50; }
   .drawer { position: fixed; top:0; right:-380px; width: 360px; height: 100vh; background: var(--panel); border-left: 1px solid var(--border); padding: 20px; overflow-y:auto; transition: right .25s; z-index: 49; }
@@ -1205,7 +1210,12 @@ PAGE = """
   body.compact .grid { gap: 10px; }
 
   @media (max-width: 900px) {
-    .left-panel { display:none; }
+    .left-panel {
+      position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
+      background: var(--panel); z-index: 49; overflow-y: auto; margin: 0;
+    }
+    .left-panel.open { left: 0; }
+    .left-toggle { display:block; }
     .drawer { width: 88vw; right: -88vw; }
   }
 
@@ -1294,8 +1304,10 @@ PAGE = """
 </div>
 {% endif %}
 
+<button class="left-toggle" onclick="toggleLeftPanel()">SECTORS</button>
+<div class="scrim" id="leftScrim" onclick="toggleLeftPanel()"></div>
 <div class="layout">
-  <div class="left-panel">
+  <div class="left-panel" id="leftPanel">
     <h3>Sectors (India)</h3>
     <div class="sector-nav">
       {% for sector, subsectors in sector_stocks.items() %}
@@ -1591,6 +1603,10 @@ function autoResubmit(checkbox) {
   }
 }
 function toggleDrawer() { document.getElementById('rightDrawer').classList.toggle('open'); }
+function toggleLeftPanel() {
+  document.getElementById('leftPanel').classList.toggle('open');
+  document.getElementById('leftScrim').classList.toggle('open');
+}
 function toggleCard(id) { document.getElementById(id).classList.toggle('expanded'); }
 function toggleSector(btn, id) { document.getElementById(id).classList.toggle('open'); btn.classList.toggle('open'); }
 function setTheme(t) { document.documentElement.setAttribute('data-theme', t); localStorage.setItem('stockizen_theme', t); }
